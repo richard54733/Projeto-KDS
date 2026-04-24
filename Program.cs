@@ -34,7 +34,10 @@ app.MapPost("/webhook", async (HttpRequest request) =>
 {
     try
     {
-        var pedido = await JsonSerializer.DeserializeAsync<Pedido>(request.Body, jsonOptions);
+        using var reader = new StreamReader(request.Body);
+        var body = await reader.ReadToEndAsync();
+
+        var pedido = JsonSerializer.Deserialize<Pedido>(body, jsonOptions);
 
         if (pedido is null)
             return Results.BadRequest("JSON inválido");
@@ -74,7 +77,7 @@ app.MapGet("/kds", () =>
         </style>
     </head>
     <body>
-        <h1>🔥 PEDIDOS EM TEMPO REAL</h1>
+        <h1>PEDIDOS EM TEMPO REAL</h1>
     """;
 
     foreach (var p in pedidos)
