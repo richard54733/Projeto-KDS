@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Collections.Generic;
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -8,12 +10,15 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// 🔥 AQUI
+//var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+//app.Urls.Add($"http://0.0.0.0:{port}");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 
 
 // 🔥 armazenamento em memória
