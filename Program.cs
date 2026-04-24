@@ -10,6 +10,11 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// 🔥 LISTAS AQUI
+var pedidosEmPreparo = new List<Pedido>();
+var pedidosFinalizados = new List<Pedido>();
+
+
 // 🔥 AQUI
 //var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 //app.Urls.Add($"http://0.0.0.0:{port}");
@@ -20,9 +25,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-// 🔥 armazenamento em memória
-var pedidos = new List<Pedido>();
 
 // 🔥 opções do JSON (ignora maiúscula/minúscula)
 var jsonOptions = new JsonSerializerOptions
@@ -42,7 +44,7 @@ app.MapPost("/webhook", async (HttpRequest request) =>
         if (pedido is null)
             return Results.BadRequest("JSON inválido");
 
-        pedidos.Add(pedido);
+        pedidosEmPreparo.Add(pedido);
 
         Console.WriteLine("\n🔥 NOVO PEDIDO");
         Console.WriteLine($"🧾 Nº: {pedido.numeroPedido}");
@@ -66,55 +68,99 @@ app.MapGet("/kds", () =>
     var html = """
     <html>
     <head>
-        <title>KDS - Cozinha</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta http-equiv="refresh" content="5"> 
         <style>
             body { font-family: Arial; background:#111; color:#fff; }
             .card { background:#222; padding:15px; margin:10px; border-radius:10px; }
-            h1 { text-align:center; }
-            .item { margin-left:10px; }
+            button { background:green; color:#fff; padding:10px; border:none; cursor:pointer; }
         </style>
+        <script>
+            async function finalizar(numero) {
+                await fetch('/finalizar/' + numero, { method: 'POST' });
+                location.reload();
+            }
+        </script>
     </head>
     <body>
-        <h1>PEDIDOS EM TEMPO REAL</h1>
+        <h1>🔥 EM PREPARO</h1>
     """;
 
-    foreach (var p in pedidos)
+    foreach (var p in pedidosEmPreparo)
     {
+        var numero = p.numeroPedido.Split('-')[0];
+
         html += $"""
         <div class="card">
-            <h2>Pedido {p.numeroPedido}</h2>
+            <h2>Pedido: {numero}</h2>
             <p><b>Cliente:</b> {p.nomeCliente}</p>
-            <p><b>Tipo:</b> {p.tipoPedido}</p>
             <p><b>Total:</b> R$ {p.valorCompra}</p>
-
-            <ul>
         """;
 
-        foreach (var item in p.produtos)
+        foreach (var prod in p.produtos)
         {
-            html += $"<li class='item'>{item.quantidade}x {item.nome}</li>";
+            html += $"<p>{prod.quantidade}x {prod.nome}</p>";
+
+            foreach (var add in prod.adicionais)
+            {
+                html += $"<p style='margin-left:20px;'>+ {add.quantidade}x {add.nome}</p>";
+            }
         }
 
-        html += """
-            </ul>
+        html += $"""
+            <button onclick="finalizar('{numero}')">✅ Finalizado</button>
         </div>
         """;
     }
 
     html += """
-    </body>
-    </html>
+        <hr>
+        <h2>📦 Finalizados (oculto na cozinha)</h2>
     """;
 
+    foreach (var p in pedidosFinalizados)
+    {
+        var numero = p.numeroPedido.Split('-')[0];
+
+        html += $"""
+        <div class="card">
+            <h3>Pedido {numero} finalizado</h3>
+        </div>
+        """;
+    }
+
+    html += "</body></html>";
+
     return Results.Content(html, "text/html");
+});
+
+app.MapPost("/finalizar/{numero}", (string numero) =>
+{
+    var pedido = pedidosEmPreparo.FirstOrDefault(p => p.numeroPedido.StartsWith(numero));
+
+    if (pedido == null)
+        return Results.NotFound();
+
+    pedidosEmPreparo.Remove(pedido);
+    pedidosFinalizados.Add(pedido);
+
+    return Results.Ok();
 });
 
 app.Run();
 
 // 🔥 MODELOS
-record Produto(string nome, string quantidade, double valor, List<string> adicionais);
+record Adicional(
+    string nome,
+    int quantidade,
+    double valor
+);
+
+record Produto(
+    string nome,
+    string quantidade,
+    double valor,
+    List<Adicional> adicionais
+);
 
 record Pedido(
     string loja,
