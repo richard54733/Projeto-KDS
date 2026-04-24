@@ -60,7 +60,7 @@ app.MapPost("/webhook", async (HttpRequest request) =>
     }
 });
 
-app.MapGet("/pedidos", () => Results.Json(pedidos));
+app.MapGet("/pedidos", () => Results.Json(pedidosEmPreparo, jsonOptions));
 
 // 🖥️ KDS (com auto refresh 🔥)
 app.MapGet("/kds", () =>

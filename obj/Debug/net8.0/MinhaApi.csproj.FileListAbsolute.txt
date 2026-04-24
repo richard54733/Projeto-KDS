@@ -31,3 +31,4 @@ C:\Users\richa\Desktop\Projeto KDS\Minhaapi\obj\Debug\net8.0\refint\MinhaApi.dll
 C:\Users\richa\Desktop\Projeto KDS\Minhaapi\obj\Debug\net8.0\MinhaApi.pdb
 C:\Users\richa\Desktop\Projeto KDS\Minhaapi\obj\Debug\net8.0\MinhaApi.genruntimeconfig.cache
 C:\Users\richa\Desktop\Projeto KDS\Minhaapi\obj\Debug\net8.0\ref\MinhaApi.dll
+C:\Users\richa\Desktop\Projeto KDS\MinhaApi\obj\Debug\net8.0\MinhaApi.sourcelink.json
