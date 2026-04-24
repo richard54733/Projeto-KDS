@@ -107,14 +107,14 @@ app.MapGet("/kds", () =>
         }
 
         html += $"""
-            <button onclick="finalizar('{numero}')">✅ Finalizado</button>
+            <button onclick="finalizar('{numero}')">Finalizado</button>
         </div>
         """;
     }
 
     html += """
         <hr>
-        <h2>📦 Finalizados (oculto na cozinha)</h2>
+        <h2>Finalizados (oculto na cozinha)</h2>
     """;
 
     foreach (var p in pedidosFinalizados)
