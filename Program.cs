@@ -82,7 +82,7 @@ app.MapGet("/kds", () =>
         </script>
     </head>
     <body>
-        <h1>🔥 EM PREPARO</h1>
+        <h1>EM PREPARO</h1>
     """;
 
     foreach (var p in pedidosEmPreparo)
