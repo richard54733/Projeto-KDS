@@ -1,5 +1,7 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Collections.Generic;
+using System.Linq;
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 
@@ -148,16 +150,17 @@ app.MapPost("/finalizar/{numero}", (string numero) =>
 
 app.Run();
 
+
+
 // 🔥 MODELOS
 record Adicional(
     string nome,
-    int quantidade,
+    [property: JsonConverter(typeof(IntOuStringConverter))] int quantidade,
     double valor
 );
-
 record Produto(
     string nome,
-    string quantidade,
+    [property: JsonConverter(typeof(IntOuStringConverter))] int quantidade,
     double valor,
     List<Adicional> adicionais
 );
@@ -175,3 +178,27 @@ record Pedido(
     string metodoPagamento,
     List<Produto> produtos
 );
+
+
+public class IntOuStringConverter : JsonConverter<int>
+{
+    public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Number)
+            return reader.GetInt32();
+
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            var value = reader.GetString();
+            if (int.TryParse(value, out int result))
+                return result;
+        }
+
+        return 0;
+    }
+
+    public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
+    {
+        writer.WriteNumberValue(value);
+    }
+}
